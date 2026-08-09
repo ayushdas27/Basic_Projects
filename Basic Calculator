@@ -1,5 +1,195 @@
-Built a Windows 11-style GUI calculator in Python using Tkinter as a hands-on learning project.
+import tkinter as tk
 
-While simple in scope, this project deepened my understanding of core programming concepts — from handling integer and string operations to structuring event-driven GUI logic. Every small build like this strengthens the fundamentals.
+# ================= Memory storage =================
+memory_value = 0.0
 
-Continuing to learn, one project at a time. 🚀
+# ================= Core functions =================
+def press_number(char):
+    current = display_var.get()
+    if current == "0" or current == "Error":
+        display_var.set(char)
+    else:
+        display_var.set(current + char)
+
+def press_dot():
+    current = display_var.get()
+    if "." not in current:
+        display_var.set(current + ".")
+
+def press_operator(op):
+    current = display_var.get()
+    if current and current[-1] not in "+-*/":
+        display_var.set(current + op)
+
+def press_equals():
+    try:
+        expression = display_var.get().replace("×", "*").replace("÷", "/")
+        result = eval(expression)
+        display_var.set(str(result))
+    except Exception:
+        display_var.set("Error")
+
+def press_clear():
+    display_var.set("0")
+
+def press_clear_entry():
+    display_var.set("0")
+
+def press_backspace():
+    current = display_var.get()
+    if len(current) > 1:
+        display_var.set(current[:-1])
+    else:
+        display_var.set("0")
+
+def press_percent():
+    try:
+        value = float(display_var.get())
+        display_var.set(str(value / 100))
+    except Exception:
+        display_var.set("Error")
+
+def press_reciprocal():
+    try:
+        value = float(display_var.get())
+        display_var.set(str(1 / value))
+    except Exception:
+        display_var.set("Error")
+
+def press_square():
+    try:
+        value = float(display_var.get())
+        display_var.set(str(value ** 2))
+    except Exception:
+        display_var.set("Error")
+
+def press_sqrt():
+    try:
+        value = float(display_var.get())
+        display_var.set(str(value ** 0.5))
+    except Exception:
+        display_var.set("Error")
+
+def press_plus_minus():
+    try:
+        value = float(display_var.get())
+        display_var.set(str(value * -1))
+    except Exception:
+        display_var.set("Error")
+
+# ================= Memory functions =================
+def memory_clear():
+    global memory_value
+    memory_value = 0.0
+
+def memory_recall():
+    display_var.set(str(memory_value))
+
+def memory_add():
+    global memory_value
+    try:
+        memory_value += float(display_var.get())
+    except Exception:
+        pass
+
+def memory_subtract():
+    global memory_value
+    try:
+        memory_value -= float(display_var.get())
+    except Exception:
+        pass
+
+def memory_store():
+    global memory_value
+    try:
+        memory_value = float(display_var.get())
+    except Exception:
+        pass
+
+# ================= Window setup =================
+window = tk.Tk()
+window.title("Calculator")
+window.geometry("380x640")
+window.resizable(False, False)
+window.configure(bg="#202020")
+
+# ---- Colors (matching Windows 11 calculator dark theme) ----
+BG = "#202020"
+DISPLAY_BG = "#202020"
+FUNC_BG = "#2b2b2b"
+NUM_BG = "#2b2b2b"
+NUM_HOVER = "#3a3a3a"
+OP_BG = "#2b2b2b"
+EQUALS_BG = "#4cc2ff"
+TEXT_COLOR = "white"
+MEMORY_COLOR = "#8a8a8a"
+
+# ================= Display =================
+display_var = tk.StringVar(value="0")
+display = tk.Label(
+    window, textvariable=display_var, anchor="e",
+    font=("Segoe UI", 40), bg=DISPLAY_BG, fg="white",
+    padx=15
+)
+display.pack(fill="both", pady=(30, 10))
+
+# ================= Memory row =================
+memory_frame = tk.Frame(window, bg=BG)
+memory_frame.pack(fill="x", padx=8)
+
+memory_buttons = [
+    ("MC", memory_clear),
+    ("MR", memory_recall),
+    ("M+", memory_add),
+    ("M-", memory_subtract),
+    ("MS", memory_store),
+]
+
+for text, cmd in memory_buttons:
+    b = tk.Button(
+        memory_frame, text=text, font=("Segoe UI", 11),
+        bg=BG, fg=MEMORY_COLOR, activebackground="#333333",
+        borderwidth=0, command=cmd
+    )
+    b.pack(side="left", expand=True, fill="both", ipady=8)
+
+# ================= Button grid =================
+grid_frame = tk.Frame(window, bg=BG)
+grid_frame.pack(expand=True, fill="both", padx=8, pady=10)
+
+# Each row: (text, bg_color, command)
+rows = [
+    [("%", FUNC_BG, press_percent), ("CE", FUNC_BG, press_clear_entry),
+     ("C", FUNC_BG, press_clear), ("⌫", FUNC_BG, press_backspace)],
+
+    [("1/x", FUNC_BG, press_reciprocal), ("x²", FUNC_BG, press_square),
+     ("²√x", FUNC_BG, press_sqrt), ("÷", OP_BG, lambda: press_operator("/"))],
+
+    [("7", NUM_BG, lambda: press_number("7")), ("8", NUM_BG, lambda: press_number("8")),
+     ("9", NUM_BG, lambda: press_number("9")), ("×", OP_BG, lambda: press_operator("*"))],
+
+    [("4", NUM_BG, lambda: press_number("4")), ("5", NUM_BG, lambda: press_number("5")),
+     ("6", NUM_BG, lambda: press_number("6")), ("−", OP_BG, lambda: press_operator("-"))],
+
+    [("1", NUM_BG, lambda: press_number("1")), ("2", NUM_BG, lambda: press_number("2")),
+     ("3", NUM_BG, lambda: press_number("3")), ("+", OP_BG, lambda: press_operator("+"))],
+
+    [("+/-", NUM_BG, press_plus_minus), ("0", NUM_BG, lambda: press_number("0")),
+     (".", NUM_BG, press_dot), ("=", EQUALS_BG, press_equals)],
+]
+
+for r, row in enumerate(rows):
+    grid_frame.rowconfigure(r, weight=1)
+    for c, (text, color, cmd) in enumerate(row):
+        grid_frame.columnconfigure(c, weight=1)
+        fg_color = "black" if color == EQUALS_BG else TEXT_COLOR
+        font_size = 16 if len(text) <= 3 else 13
+        btn = tk.Button(
+            grid_frame, text=text, font=("Segoe UI", font_size),
+            bg=color, fg=fg_color,
+            activebackground=NUM_HOVER if color != EQUALS_BG else "#3aa9e0",
+            borderwidth=0, command=cmd
+        )
+        btn.grid(row=r, column=c, sticky="nsew", padx=3, pady=3, ipady=18)
+
+window.mainloop()
